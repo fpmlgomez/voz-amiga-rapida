@@ -16,9 +16,10 @@ export const useSpeechSynthesis = () => {
   
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSpokenTextRef = useRef('');
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   // Función mejorada para detectar género basándose en nombres
-  const detectGender = (voiceName: string): 'male' | 'female' => {
+  const detectGender = useCallback((voiceName: string): 'male' | 'female' => {
     const name = voiceName.toLowerCase();
     
     // Nombres femeninos comunes en voces de síntesis
@@ -57,9 +58,19 @@ export const useSpeechSynthesis = () => {
       }
     }
     
-    // Fallback: si no se puede determinar, asumimos masculino por defecto
     return 'male';
-  };
+  }, []);
+
+  // Función para limpiar recursos de síntesis anteriores
+  const cleanupSynthesis = useCallback(() => {
+    if (utteranceRef.current) {
+      utteranceRef.current.onstart = null;
+      utteranceRef.current.onend = null;
+      utteranceRef.current.onerror = null;
+      utteranceRef.current = null;
+    }
+    speechSynthesis.cancel();
+  }, []);
 
   useEffect(() => {
     const loadVoices = () => {
@@ -86,15 +97,18 @@ export const useSpeechSynthesis = () => {
     
     return () => {
       speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+      cleanupSynthesis();
     };
-  }, [selectedVoice]);
+  }, [selectedVoice, detectGender, cleanupSynthesis]);
 
   const speak = useCallback((textToSpeak: string) => {
     if (!textToSpeak.trim()) return;
     
-    speechSynthesis.cancel();
+    // Limpiar síntesis anterior
+    cleanupSynthesis();
     
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utteranceRef.current = utterance;
     
     if (selectedVoice) {
       const voice = speechSynthesis.getVoices().find(v => 
@@ -111,24 +125,31 @@ export const useSpeechSynthesis = () => {
     utterance.volume = 1;
     
     utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
+    utterance.onend = () => {
+      setIsSpeaking(false);
+      utteranceRef.current = null;
+    };
+    utterance.onerror = () => {
+      setIsSpeaking(false);
+      utteranceRef.current = null;
+    };
     
     speechSynthesis.speak(utterance);
     lastSpokenTextRef.current = textToSpeak;
-  }, [selectedVoice, language]);
+  }, [selectedVoice, language, cleanupSynthesis]);
 
-  const stopSpeaking = () => {
-    speechSynthesis.cancel();
+  const stopSpeaking = useCallback(() => {
+    cleanupSynthesis();
     setIsSpeaking(false);
-  };
+  }, [cleanupSynthesis]);
 
-  const handleAutoSpeak = (newText: string, autoSpeak: boolean) => {
+  const handleAutoSpeak = useCallback((newText: string, autoSpeak: boolean) => {
     if (!autoSpeak) return;
     
     // Limpiar el timeout anterior
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
     }
     
     // Si el texto está vacío, no hacer nada
@@ -153,7 +174,7 @@ export const useSpeechSynthesis = () => {
         }, 300);
       }
     }
-  };
+  }, [speak]);
 
   // Limpiar timeout al desmontar el componente
   useEffect(() => {
@@ -161,8 +182,9 @@ export const useSpeechSynthesis = () => {
       if (typingTimeoutRef.current) {
         clearTimeout(typingTimeoutRef.current);
       }
+      cleanupSynthesis();
     };
-  }, []);
+  }, [cleanupSynthesis]);
 
   return {
     voices,
