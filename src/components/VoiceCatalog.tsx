@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,13 +25,22 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
 }) => {
   const [testingVoice, setTestingVoice] = useState<string | null>(null);
 
+  // Función para limpiar el nombre de la voz (quitar Microsoft, etc.)
+  const cleanVoiceName = (name: string) => {
+    return name
+      .replace(/Microsoft\s+/gi, '')
+      .replace(/\s+Microsoft/gi, '')
+      .trim();
+  };
+
   const testVoice = (voice: Voice) => {
     setTestingVoice(voice.id);
     speechSynthesis.cancel();
     
+    const cleanName = cleanVoiceName(voice.name);
     const testText = language.startsWith('es') 
-      ? `Hola, soy ${voice.name}. Esta es mi voz.`
-      : `Hello, I am ${voice.name}. This is my voice.`;
+      ? `Hola, soy ${cleanName}. Esta es mi voz.`
+      : `Hello, I am ${cleanName}. This is my voice.`;
     
     const utterance = new SpeechSynthesisUtterance(testText);
     
@@ -53,14 +61,6 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
     utterance.onerror = () => setTestingVoice(null);
     
     speechSynthesis.speak(utterance);
-  };
-
-  // Función para limpiar el nombre de la voz (quitar Microsoft, etc.)
-  const cleanVoiceName = (name: string) => {
-    return name
-      .replace(/Microsoft\s+/gi, '')
-      .replace(/\s+Microsoft/gi, '')
-      .trim();
   };
 
   const filteredVoices = voices.filter(v => v.lang.startsWith(language.split('-')[0]));
