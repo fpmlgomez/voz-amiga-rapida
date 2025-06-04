@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Volume2, Mic, Settings, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,6 +20,10 @@ const TextToSpeechApp = () => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [language, setLanguage] = useState('es-ES');
+  const [autoSpeak, setAutoSpeak] = useState(true);
+  
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSpokenTextRef = useRef('');
 
   // Función mejorada para detectar género basándose en nombres
   const detectGender = (voiceName: string): 'male' | 'female' => {
@@ -93,7 +97,42 @@ const TextToSpeechApp = () => {
     };
   }, [selectedVoice]);
 
-  const speak = (textToSpeak: string = text) => {
+  // Función para detectar cuando el usuario termina de escribir una palabra
+  const handleTextChange = (newText: string) => {
+    setText(newText);
+    
+    if (!autoSpeak) return;
+    
+    // Limpiar el timeout anterior
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Si el texto está vacío, no hacer nada
+    if (!newText.trim()) {
+      lastSpokenTextRef.current = '';
+      return;
+    }
+    
+    // Detectar si se terminó una palabra (espacio o puntuación al final)
+    const lastChar = newText[newText.length - 1];
+    const isWordEnding = /[\s.,;:!?]/.test(lastChar);
+    
+    if (isWordEnding) {
+      // Obtener la última palabra completa
+      const words = newText.trim().split(/\s+/);
+      const lastWord = words[words.length - 1]?.replace(/[.,;:!?]/g, '');
+      
+      if (lastWord && lastWord !== lastSpokenTextRef.current) {
+        // Pequeña pausa antes de reproducir para evitar interrupciones
+        typingTimeoutRef.current = setTimeout(() => {
+          speak(lastWord);
+        }, 300);
+      }
+    }
+  };
+
+  const speak = useCallback((textToSpeak: string = text) => {
     if (!textToSpeak.trim()) return;
     
     speechSynthesis.cancel();
@@ -119,7 +158,8 @@ const TextToSpeechApp = () => {
     utterance.onerror = () => setIsSpeaking(false);
     
     speechSynthesis.speak(utterance);
-  };
+    lastSpokenTextRef.current = textToSpeak;
+  }, [text, selectedVoice, language]);
 
   const stopSpeaking = () => {
     speechSynthesis.cancel();
@@ -132,6 +172,15 @@ const TextToSpeechApp = () => {
       speak();
     }
   };
+
+  // Limpiar timeout al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -154,22 +203,36 @@ const TextToSpeechApp = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-800">Escribe tu mensaje</h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowSettings(!showSettings)}
-                  className="flex items-center gap-2"
-                >
-                  <Settings size={16} />
-                  Configuración
-                </Button>
+                <div className="flex items-center gap-2">
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={autoSpeak}
+                      onChange={(e) => setAutoSpeak(e.target.checked)}
+                      className="rounded"
+                    />
+                    Auto-pronunciar
+                  </label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowSettings(!showSettings)}
+                    className="flex items-center gap-2"
+                  >
+                    <Settings size={16} />
+                    Configuración
+                  </Button>
+                </div>
               </div>
               
               <Textarea
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => handleTextChange(e.target.value)}
                 onKeyDown={handleKeyPress}
-                placeholder="Escribe aquí tu mensaje... (Ctrl + Enter para reproducir)"
+                placeholder={autoSpeak 
+                  ? "Escribe aquí... Las palabras se pronunciarán automáticamente al terminar de escribirlas" 
+                  : "Escribe aquí tu mensaje... (Ctrl + Enter para reproducir)"
+                }
                 className="min-h-[200px] text-lg resize-none border-2 focus:border-blue-400 transition-colors"
               />
               
@@ -181,7 +244,7 @@ const TextToSpeechApp = () => {
                   className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg transform transition-all hover:scale-105"
                 >
                   <Play size={20} />
-                  Reproducir Voz
+                  Reproducir Todo
                 </Button>
                 
                 {isSpeaking && (
@@ -198,7 +261,10 @@ const TextToSpeechApp = () => {
               </div>
               
               <div className="text-center text-sm text-gray-500">
-                Tip: Usa Ctrl + Enter para reproducir rápidamente
+                {autoSpeak 
+                  ? "Modo auto-pronunciar activado. Las palabras se pronuncian al escribir un espacio o puntuación."
+                  : "Usa Ctrl + Enter para reproducir rápidamente o activa el modo auto-pronunciar"
+                }
               </div>
             </div>
           </Card>
