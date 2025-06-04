@@ -55,6 +55,14 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
     speechSynthesis.speak(utterance);
   };
 
+  // Función para limpiar el nombre de la voz (quitar Microsoft, etc.)
+  const cleanVoiceName = (name: string) => {
+    return name
+      .replace(/Microsoft\s+/gi, '')
+      .replace(/\s+Microsoft/gi, '')
+      .trim();
+  };
+
   const filteredVoices = voices.filter(v => v.lang.startsWith(language.split('-')[0]));
   const maleVoices = filteredVoices.filter(v => v.gender === 'male');
   const femaleVoices = filteredVoices.filter(v => v.gender === 'female');
@@ -78,14 +86,14 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
               <Users size={16} className="text-pink-600" />
             )}
             <h4 className="font-medium text-gray-800">
-              {voice.name}
+              {cleanVoiceName(voice.name)}
             </h4>
             {selectedVoice?.id === voice.id && (
               <Check size={16} className="text-green-600" />
             )}
           </div>
           <p className="text-sm text-gray-600">
-            {voice.gender === 'male' ? 'Voz masculina' : 'Voz femenina'} - {voice.lang}
+            {voice.gender === 'female' ? 'Voz femenina' : 'Voz masculina'} - {voice.lang}
           </p>
         </div>
         
@@ -111,21 +119,6 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Catálogo de Voces</h3>
       
       <div className="space-y-6">
-        {/* Voces Masculinas */}
-        {maleVoices.length > 0 && (
-          <div>
-            <h4 className="text-md font-medium text-gray-700 mb-3 flex items-center gap-2">
-              <User size={18} className="text-blue-600" />
-              Voces Masculinas ({maleVoices.length})
-            </h4>
-            <div className="space-y-2 max-h-60 overflow-y-auto">
-              {maleVoices.map((voice) => (
-                <VoiceCard key={voice.id} voice={voice} />
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Voces Femeninas */}
         {femaleVoices.length > 0 && (
           <div>
@@ -135,6 +128,21 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
             </h4>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {femaleVoices.map((voice) => (
+                <VoiceCard key={voice.id} voice={voice} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Voces Masculinas */}
+        {maleVoices.length > 0 && (
+          <div>
+            <h4 className="text-md font-medium text-gray-700 mb-3 flex items-center gap-2">
+              <User size={18} className="text-blue-600" />
+              Voces Masculinas ({maleVoices.length})
+            </h4>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {maleVoices.map((voice) => (
                 <VoiceCard key={voice.id} voice={voice} />
               ))}
             </div>

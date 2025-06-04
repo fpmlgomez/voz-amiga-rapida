@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Volume2, Mic, Settings, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,6 +21,50 @@ const TextToSpeechApp = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [language, setLanguage] = useState('es-ES');
 
+  // Función mejorada para detectar género basándose en nombres
+  const detectGender = (voiceName: string): 'male' | 'female' => {
+    const name = voiceName.toLowerCase();
+    
+    // Nombres femeninos comunes en voces de síntesis
+    const femaleNames = [
+      'helena', 'maria', 'sofia', 'elena', 'carmen', 'pilar', 'ana', 'lucia',
+      'female', 'mujer', 'woman', 'sabina', 'ines', 'paulina', 'monica',
+      'zira', 'cortana', 'hazel', 'susan', 'karen', 'samantha', 'victoria',
+      'serena', 'alex', 'allison', 'ava', 'nicky', 'zoë', 'amelie', 'anna',
+      'carmit', 'damayanti', 'ellen', 'fiona', 'ioana', 'joana', 'kanya',
+      'kyoko', 'laura', 'lekha', 'luca', 'luciana', 'mariska', 'melina',
+      'milena', 'moira', 'nora', 'paulina', 'raveena', 'salli', 'sin-ji',
+      'tatyana', 'valentina', 'veena', 'vicki', 'yuki'
+    ];
+    
+    // Nombres masculinos comunes en voces de síntesis
+    const maleNames = [
+      'diego', 'jorge', 'pablo', 'carlos', 'miguel', 'alberto', 'fernando',
+      'male', 'hombre', 'man', 'david', 'mark', 'daniel', 'francisco',
+      'ricardo', 'manuel', 'antonio', 'jose', 'juan', 'luis', 'pedro',
+      'alex', 'joey', 'justin', 'matthew', 'brian', 'russell', 'geraint',
+      'giorgio', 'hans', 'karl', 'mathieu', 'takumi', 'aditi', 'ravi',
+      'christian', 'felipe', 'ivan', 'maxim', 'ricardo', 'ruben'
+    ];
+    
+    // Verificar si contiene algún nombre femenino
+    for (const femaleName of femaleNames) {
+      if (name.includes(femaleName)) {
+        return 'female';
+      }
+    }
+    
+    // Verificar si contiene algún nombre masculino
+    for (const maleName of maleNames) {
+      if (name.includes(maleName)) {
+        return 'male';
+      }
+    }
+    
+    // Fallback: si no se puede determinar, asumimos masculino por defecto
+    return 'male';
+  };
+
   useEffect(() => {
     const loadVoices = () => {
       const availableVoices = speechSynthesis.getVoices();
@@ -31,10 +74,7 @@ const TextToSpeechApp = () => {
           id: voice.voiceURI || voice.name,
           name: voice.name,
           lang: voice.lang,
-          gender: voice.name.toLowerCase().includes('female') || 
-                 voice.name.toLowerCase().includes('mujer') ||
-                 voice.name.toLowerCase().includes('maria') ||
-                 voice.name.toLowerCase().includes('sofia') ? 'female' : 'male'
+          gender: detectGender(voice.name)
         }));
       
       setVoices(voiceList);
