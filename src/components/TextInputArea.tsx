@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, Pause, Settings } from 'lucide-react';
+import { Play, Pause, Settings, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -37,6 +37,11 @@ const TextInputArea: React.FC<TextInputAreaProps> = ({
     }
   };
 
+  const handleClearText = () => {
+    setText('');
+    onTextChange('');
+  };
+
   return (
     <Card className="p-6 shadow-lg border-0 bg-white/80 backdrop-blur-sm">
       <div className="space-y-4">
@@ -52,6 +57,17 @@ const TextInputArea: React.FC<TextInputAreaProps> = ({
               />
               Auto-pronunciar
             </label>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearText}
+              disabled={!text.trim()}
+              className="flex items-center gap-2 text-red-600 hover:bg-red-50"
+              title="Borrar todo el texto"
+            >
+              <Trash2 size={16} />
+              Borrar Todo
+            </Button>
             <Button
               variant="outline"
               size="sm"
