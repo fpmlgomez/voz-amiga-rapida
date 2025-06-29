@@ -76,7 +76,7 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
           ? 'border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md transform scale-[1.02]' 
           : 'border-gray-100 hover:border-gray-200 bg-white hover:bg-gray-50'
       }`}
-      onClick={() => onVoiceChange(voice)}
+      onClick={() => onVoiceSelect(voice)}
     >
       <div className="flex items-center justify-between">
         <div className="flex-1">
