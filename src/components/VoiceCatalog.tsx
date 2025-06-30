@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Check, User, Users, Volume2, Sparkles } from 'lucide-react';
+import { Play, Check, User, Users, Volume2, Sparkles, Crown } from 'lucide-react';
 
 interface Voice {
   id: string;
@@ -26,12 +26,22 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
 }) => {
   const [testingVoice, setTestingVoice] = useState<string | null>(null);
 
-  // Función para limpiar el nombre de la voz (quitar Microsoft, etc.)
+  // Función para limpiar el nombre de la voz
   const cleanVoiceName = (name: string) => {
     return name
       .replace(/Microsoft\s+/gi, '')
       .replace(/\s+Microsoft/gi, '')
       .trim();
+  };
+
+  // Función para detectar si es una voz natural/premium
+  const isNaturalVoice = (voice: Voice) => {
+    const name = voice.name.toLowerCase();
+    const naturalIndicators = [
+      'helena', 'maria', 'sofia', 'elena', 'lucia', 'paloma',
+      'premium', 'natural', 'neural', 'wavenet'
+    ];
+    return naturalIndicators.some(indicator => name.includes(indicator));
   };
 
   const testVoice = (voice: Voice) => {
@@ -40,8 +50,8 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
     
     const cleanName = cleanVoiceName(voice.name);
     const testText = language.startsWith('es') 
-      ? `Hola, soy ${cleanName}. Esta es mi voz.`
-      : `Hello, I am ${cleanName}. This is my voice.`;
+      ? `Hola, soy ${cleanName}. Esta es mi voz natural y humana.`
+      : `Hello, I am ${cleanName}. This is my natural and human voice.`;
     
     const utterance = new SpeechSynthesisUtterance(testText);
     
@@ -65,17 +75,24 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
   };
 
   const filteredVoices = voices.filter(v => v.lang.startsWith(language.split('-')[0]));
+  
+  // Separar voces femeninas naturales, otras femeninas, y masculinas
+  const naturalFemaleVoices = filteredVoices.filter(v => 
+    v.gender === 'female' && isNaturalVoice(v)
+  );
+  const otherFemaleVoices = filteredVoices.filter(v => 
+    v.gender === 'female' && !isNaturalVoice(v)
+  );
   const maleVoices = filteredVoices.filter(v => v.gender === 'male');
-  const femaleVoices = filteredVoices.filter(v => v.gender === 'female');
 
-  const VoiceCard = ({ voice }: { voice: Voice }) => (
+  const VoiceCard = ({ voice, isRecommended = false }: { voice: Voice; isRecommended?: boolean }) => (
     <Card 
       key={voice.id} 
       className={`p-4 cursor-pointer transition-all duration-200 hover:shadow-md border-2 ${
         selectedVoice?.id === voice.id 
           ? 'border-blue-400 bg-gradient-to-r from-blue-50 to-indigo-50 shadow-md transform scale-[1.02]' 
           : 'border-gray-100 hover:border-gray-200 bg-white hover:bg-gray-50'
-      }`}
+      } ${isRecommended ? 'ring-2 ring-pink-200' : ''}`}
       onClick={() => onVoiceSelect(voice)}
     >
       <div className="flex items-center justify-between">
@@ -84,10 +101,14 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
             <div className={`p-2 rounded-lg ${
               voice.gender === 'male' 
                 ? 'bg-blue-100 text-blue-600' 
-                : 'bg-pink-100 text-pink-600'
+                : isRecommended 
+                  ? 'bg-gradient-to-r from-pink-100 to-purple-100 text-pink-600'
+                  : 'bg-pink-100 text-pink-600'
             }`}>
               {voice.gender === 'male' ? (
                 <User size={16} />
+              ) : isRecommended ? (
+                <Crown size={16} />
               ) : (
                 <Users size={16} />
               )}
@@ -95,6 +116,11 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
             <div className="flex-1">
               <h4 className="font-semibold text-gray-800 flex items-center gap-2">
                 {cleanVoiceName(voice.name)}
+                {isRecommended && (
+                  <span className="text-xs bg-gradient-to-r from-pink-500 to-purple-500 text-white px-2 py-1 rounded-full font-medium">
+                    ✨ Natural
+                  </span>
+                )}
                 {selectedVoice?.id === voice.id && (
                   <div className="flex items-center gap-1">
                     <Check size={16} className="text-green-600" />
@@ -107,10 +133,12 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
               <div className="flex items-center gap-2 mt-1">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   voice.gender === 'female' 
-                    ? 'bg-pink-100 text-pink-700' 
+                    ? isRecommended 
+                      ? 'bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700' 
+                      : 'bg-pink-100 text-pink-700'
                     : 'bg-blue-100 text-blue-700'
                 }`}>
-                  {voice.gender === 'female' ? 'Femenina' : 'Masculina'}
+                  {voice.gender === 'female' ? 'Voz Femenina' : 'Voz Masculina'}
                 </span>
                 <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
                   {voice.lang}
@@ -130,7 +158,9 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
           className={`ml-3 flex items-center gap-2 transition-all duration-200 ${
             testingVoice === voice.id
               ? 'bg-green-500 hover:bg-green-600 text-white'
-              : 'bg-blue-500 hover:bg-blue-600 text-white'
+              : isRecommended
+                ? 'bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white'
+                : 'bg-blue-500 hover:bg-blue-600 text-white'
           }`}
         >
           <Play size={14} />
@@ -149,25 +179,45 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
         </div>
         <div>
           <h3 className="text-xl font-semibold text-gray-800">Catálogo de Voces</h3>
-          <p className="text-sm text-gray-500">Descubre y selecciona tu voz favorita</p>
+          <p className="text-sm text-gray-500">Descubre voces naturales y humanas</p>
         </div>
       </div>
       
       <div className="space-y-8">
-        {/* Voces Femeninas */}
-        {femaleVoices.length > 0 && (
+        {/* Voces Femeninas Naturales - DESTACADAS */}
+        {naturalFemaleVoices.length > 0 && (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-2 bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg">
+                <Crown size={18} className="text-pink-600" />
+              </div>
+              <h4 className="text-lg font-semibold text-gray-700">Voces Femeninas Naturales</h4>
+              <span className="px-3 py-1 bg-gradient-to-r from-pink-100 to-purple-100 text-pink-700 rounded-full text-sm font-medium">
+                ✨ {naturalFemaleVoices.length} recomendadas
+              </span>
+            </div>
+            <div className="grid gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              {naturalFemaleVoices.map((voice) => (
+                <VoiceCard key={voice.id} voice={voice} isRecommended={true} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Otras Voces Femeninas */}
+        {otherFemaleVoices.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="p-2 bg-pink-100 rounded-lg">
                 <Users size={18} className="text-pink-600" />
               </div>
-              <h4 className="text-lg font-semibold text-gray-700">Voces Femeninas</h4>
+              <h4 className="text-lg font-semibold text-gray-700">Otras Voces Femeninas</h4>
               <span className="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-sm font-medium">
-                {femaleVoices.length} disponibles
+                {otherFemaleVoices.length} disponibles
               </span>
             </div>
             <div className="grid gap-3 max-h-80 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-              {femaleVoices.map((voice) => (
+              {otherFemaleVoices.map((voice) => (
                 <VoiceCard key={voice.id} voice={voice} />
               ))}
             </div>
@@ -205,17 +255,17 @@ const VoiceCatalog: React.FC<VoiceCatalogProps> = ({
         )}
       </div>
 
-      {/* Tip Footer */}
-      <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-100">
+      {/* Tip Footer mejorado */}
+      <div className="mt-6 p-4 bg-gradient-to-r from-pink-50 via-purple-50 to-blue-50 rounded-xl border border-pink-100">
         <div className="flex items-start gap-3">
-          <div className="p-1 bg-blue-100 rounded-lg">
-            <Sparkles size={16} className="text-blue-600" />
+          <div className="p-1 bg-pink-100 rounded-lg">
+            <Sparkles size={16} className="text-pink-600" />
           </div>
           <div>
-            <p className="text-sm font-medium text-blue-900 mb-1">Consejo</p>
-            <p className="text-sm text-blue-700">
-              Haz clic en "Probar" para escuchar cada voz antes de seleccionarla. 
-              La voz seleccionada se marcará con un indicador verde.
+            <p className="text-sm font-medium text-pink-900 mb-1">Recomendación</p>
+            <p className="text-sm text-pink-700">
+              Las <strong>voces naturales femeninas</strong> ofrecen la mejor experiencia de audio. 
+              Prueba Helena, María o Sofía para obtener un sonido más humano y expresivo.
             </p>
           </div>
         </div>
