@@ -17,58 +17,100 @@ export const useSpeechSynthesis = () => {
   const lastSpokenTextRef = useRef('');
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
-  // Función mejorada para detectar género con más nombres femeninos
+  // Función mejorada para detectar género con mejor precisión
   const detectGender = useCallback((voiceName: string): 'male' | 'female' => {
     const name = voiceName.toLowerCase();
     
-    // Nombres femeninos expandidos, incluyendo voces más naturales
-    const femaleNames = [
-      // Nombres en español
-      'helena', 'maria', 'sofia', 'elena', 'carmen', 'pilar', 'ana', 'lucia',
-      'sabina', 'ines', 'paulina', 'monica', 'paloma', 'esperanza', 'dolores',
-      'remedios', 'amparo', 'consuelo', 'mercedes', 'rosario', 'beatriz',
-      'cristina', 'patricia', 'marta', 'sara', 'laura', 'andrea',
-      
-      // Nombres en inglés y otros idiomas
-      'female', 'mujer', 'woman', 'zira', 'cortana', 'hazel', 'susan', 'karen', 
-      'samantha', 'victoria', 'serena', 'alex', 'allison', 'ava', 'nicky', 'zoë', 
-      'amelie', 'anna', 'carmit', 'damayanti', 'ellen', 'fiona', 'ioana', 'joana', 
-      'kanya', 'kyoko', 'lekha', 'luca', 'luciana', 'mariska', 'melina',
-      'milena', 'moira', 'nora', 'raveena', 'salli', 'sin-ji',
-      'tatyana', 'valentina', 'veena', 'vicki', 'yuki', 'ivy', 'joanna',
-      'kendra', 'kimberly', 'salli', 'joey', 'nicole', 'emma', 'amy',
-      'chloe', 'grace', 'heather', 'jenny', 'julie', 'kate', 'linda',
-      'mary', 'nancy', 'ruth', 'sandra', 'stephanie', 'tessa', 'wendy',
-      
-      // Indicadores de género
-      'femenina', 'feminine', 'fem', 'girl', 'lady', 'woman', 'chica'
+    // Indicadores explícitos de género - más específicos primero
+    const femaleIndicators = [
+      'female', 'mujer', 'woman', 'femenina', 'feminine', 'fem', 'girl', 'lady', 'chica'
     ];
     
-    // Nombres masculinos
-    const maleNames = [
-      'diego', 'jorge', 'pablo', 'carlos', 'miguel', 'alberto', 'fernando',
-      'male', 'hombre', 'man', 'david', 'mark', 'daniel', 'francisco',
-      'ricardo', 'manuel', 'antonio', 'jose', 'juan', 'luis', 'pedro',
-      'joey', 'justin', 'matthew', 'brian', 'russell', 'geraint',
-      'giorgio', 'hans', 'karl', 'mathieu', 'takumi', 'ravi',
-      'christian', 'felipe', 'ivan', 'maxim', 'ruben'
+    const maleIndicators = [
+      'male', 'hombre', 'man', 'masculino', 'masculine', 'masc', 'boy', 'chico'
     ];
     
-    // Verificar nombres femeninos primero (más específicos)
-    for (const femaleName of femaleNames) {
-      if (name.includes(femaleName)) {
+    // Verificar indicadores explícitos primero
+    for (const indicator of femaleIndicators) {
+      if (name.includes(indicator)) {
         return 'female';
       }
     }
     
-    // Verificar nombres masculinos
-    for (const maleName of maleNames) {
-      if (name.includes(maleName)) {
+    for (const indicator of maleIndicators) {
+      if (name.includes(indicator)) {
         return 'male';
       }
     }
     
-    // Por defecto, asumir masculino si no se puede determinar
+    // Nombres específicos femeninos (más precisos)
+    const femaleNames = [
+      // Nombres en español - más específicos
+      'helena', 'maria', 'sofia', 'elena', 'carmen', 'pilar', 'ana', 'lucia',
+      'sabina', 'ines', 'paulina', 'monica', 'paloma', 'esperanza', 'dolores',
+      'remedios', 'amparo', 'consuelo', 'mercedes', 'rosario', 'beatriz',
+      'cristina', 'patricia', 'marta', 'sara', 'laura', 'andrea', 'isabel',
+      
+      // Nombres en inglés - más específicos
+      'zira', 'cortana', 'hazel', 'susan', 'karen', 'samantha', 'victoria', 
+      'serena', 'allison', 'ava', 'nicky', 'zoë', 'amelie', 'anna', 'carmit', 
+      'damayanti', 'ellen', 'fiona', 'ioana', 'joana', 'kanya', 'kyoko', 
+      'lekha', 'luciana', 'mariska', 'melina', 'milena', 'moira', 'nora', 
+      'raveena', 'salli', 'tatyana', 'valentina', 'veena', 'vicki', 'yuki', 
+      'ivy', 'joanna', 'kendra', 'kimberly', 'nicole', 'emma', 'amy',
+      'chloe', 'grace', 'heather', 'jenny', 'julie', 'kate', 'linda',
+      'mary', 'nancy', 'ruth', 'sandra', 'stephanie', 'tessa', 'wendy'
+    ];
+    
+    // Nombres específicos masculinos (más precisos)
+    const maleNames = [
+      // Nombres en español
+      'diego', 'jorge', 'pablo', 'carlos', 'miguel', 'alberto', 'fernando',
+      'francisco', 'ricardo', 'manuel', 'antonio', 'jose', 'juan', 'luis', 
+      'pedro', 'rafael', 'alejandro', 'javier', 'daniel', 'eduardo',
+      
+      // Nombres en inglés
+      'david', 'mark', 'joey', 'justin', 'matthew', 'brian', 'russell', 
+      'geraint', 'giorgio', 'hans', 'karl', 'mathieu', 'takumi', 'ravi',
+      'christian', 'felipe', 'ivan', 'maxim', 'ruben', 'alex', 'eric',
+      'john', 'michael', 'robert', 'william', 'james', 'thomas', 'christopher',
+      'charles', 'steven', 'kenneth', 'andrew', 'joshua', 'kevin', 'brian'
+    ];
+    
+    // Verificar nombres femeninos - usar coincidencia más estricta
+    for (const femaleName of femaleNames) {
+      // Buscar el nombre como palabra completa o al principio/final
+      const regex = new RegExp(`\\b${femaleName}\\b|^${femaleName}|${femaleName}$`, 'i');
+      if (regex.test(name)) {
+        return 'female';
+      }
+    }
+    
+    // Verificar nombres masculinos - usar coincidencia más estricta
+    for (const maleName of maleNames) {
+      // Buscar el nombre como palabra completa o al principio/final
+      const regex = new RegExp(`\\b${maleName}\\b|^${maleName}|${maleName}$`, 'i');
+      if (regex.test(name)) {
+        return 'male';
+      }
+    }
+    
+    // Casos especiales por patrones
+    if (name.includes('microsoft') && name.includes('zira')) return 'female';
+    if (name.includes('microsoft') && name.includes('david')) return 'male';
+    
+    // Si no se puede determinar, usar una heurística más conservadora
+    // Revisar si hay más indicios en el nombre completo
+    const wordCount = name.split(' ').length;
+    if (wordCount > 1) {
+      const words = name.split(' ');
+      for (const word of words) {
+        if (femaleNames.includes(word)) return 'female';
+        if (maleNames.includes(word)) return 'male';
+      }
+    }
+    
+    // Por defecto, asumir masculino solo si no hay dudas
     return 'male';
   }, []);
 
@@ -86,14 +128,21 @@ export const useSpeechSynthesis = () => {
   useEffect(() => {
     const loadVoices = () => {
       const availableVoices = speechSynthesis.getVoices();
+      console.log('Available voices:', availableVoices.map(v => ({ name: v.name, lang: v.lang })));
+      
       const voiceList: Voice[] = availableVoices
         .filter(voice => voice.lang.startsWith('es') || voice.lang.startsWith('en'))
-        .map(voice => ({
-          id: voice.voiceURI || voice.name,
-          name: voice.name,
-          lang: voice.lang,
-          gender: detectGender(voice.name)
-        }))
+        .map(voice => {
+          const detectedGender = detectGender(voice.name);
+          console.log(`Voice: ${voice.name} -> Gender: ${detectedGender}`);
+          
+          return {
+            id: voice.voiceURI || voice.name,
+            name: voice.name,
+            lang: voice.lang,
+            gender: detectedGender
+          };
+        })
         // Ordenar priorizando voces femeninas naturales
         .sort((a, b) => {
           // Priorizar voces femeninas
@@ -111,6 +160,7 @@ export const useSpeechSynthesis = () => {
           return a.name.localeCompare(b.name);
         });
       
+      console.log('Processed voices:', voiceList);
       setVoices(voiceList);
       
       // Seleccionar voz por defecto: priorizar voz femenina española natural
@@ -127,6 +177,7 @@ export const useSpeechSynthesis = () => {
           || voiceList.find(v => v.lang.startsWith('es')) 
           || voiceList[0];
         
+        console.log('Selected default voice:', preferredVoice);
         setSelectedVoice(preferredVoice);
       }
     };
