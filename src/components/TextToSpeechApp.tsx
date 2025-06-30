@@ -26,6 +26,7 @@ const TextToSpeechApp = () => {
   const handleSpeak = () => speak(text);
 
   const handleTextChange = (newText: string) => {
+    setText(newText);
     handleAutoSpeak(newText, autoSpeak);
   };
 
@@ -40,7 +41,7 @@ const TextToSpeechApp = () => {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-300">
             <TextInputArea
               text={text}
-              setText={setText}
+              setText={handleTextChange}
               autoSpeak={autoSpeak}
               setAutoSpeak={setAutoSpeak}
               showSettings={showSettings}
@@ -55,18 +56,16 @@ const TextToSpeechApp = () => {
 
         {/* Side Panel */}
         <div className="space-y-6">
-          {/* Voice Settings */}
-          {showSettings && (
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-300">
-              <VoiceSettings
-                voices={voices}
-                selectedVoice={selectedVoice}
-                onVoiceChange={setSelectedVoice}
-                language={language}
-                onLanguageChange={setLanguage}
-              />
-            </div>
-          )}
+          {/* Voice Settings - Always visible but collapsible */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-300">
+            <VoiceSettings
+              voices={voices}
+              selectedVoice={selectedVoice}
+              onVoiceChange={setSelectedVoice}
+              language={language}
+              onLanguageChange={setLanguage}
+            />
+          </div>
           
           {/* Quick Phrases */}
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all duration-300">

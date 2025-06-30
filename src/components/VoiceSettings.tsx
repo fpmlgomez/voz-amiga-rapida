@@ -30,6 +30,13 @@ const VoiceSettings: React.FC<VoiceSettingsProps> = ({
 }) => {
   const [showCatalog, setShowCatalog] = useState(false);
 
+  // Filtrar voces por idioma actual
+  const filteredVoices = voices.filter(v => v.lang.startsWith(language.split('-')[0]));
+  
+  // Separar voces femeninas de las masculinas para el selector rápido
+  const femaleVoices = filteredVoices.filter(v => v.gender === 'female');
+  const maleVoices = filteredVoices.filter(v => v.gender === 'male');
+
   return (
     <div className="space-y-6">
       <Card className="p-6 shadow-lg border-0 bg-white/90 backdrop-blur-sm">
@@ -62,6 +69,57 @@ const VoiceSettings: React.FC<VoiceSettingsProps> = ({
             </Select>
           </div>
 
+          {/* Quick Voice Selector */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700 flex items-center gap-2">
+              <User size={16} className="text-gray-600" />
+              Selección Rápida de Voz
+            </label>
+            <Select 
+              value={selectedVoice?.id || ''} 
+              onValueChange={(voiceId) => {
+                const voice = voices.find(v => v.id === voiceId);
+                if (voice) onVoiceChange(voice);
+              }}
+            >
+              <SelectTrigger className="bg-white border-gray-200 hover:border-blue-300 transition-colors">
+                <SelectValue placeholder="Selecciona una voz" />
+              </SelectTrigger>
+              <SelectContent>
+                {femaleVoices.length > 0 && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-pink-700 bg-pink-50">
+                      💃 Voces Femeninas
+                    </div>
+                    {femaleVoices.map((voice) => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-pink-600">♀</span>
+                          {voice.name.replace(/Microsoft\s+/gi, '').replace(/\s+Microsoft/gi, '').trim()}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+                {maleVoices.length > 0 && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-blue-700 bg-blue-50">
+                      🤵 Voces Masculinas
+                    </div>
+                    {maleVoices.map((voice) => (
+                      <SelectItem key={voice.id} value={voice.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-600">♂</span>
+                          {voice.name.replace(/Microsoft\s+/gi, '').replace(/\s+Microsoft/gi, '').trim()}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Current Voice Display */}
           {selectedVoice && (
             <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
@@ -70,14 +128,16 @@ const VoiceSettings: React.FC<VoiceSettingsProps> = ({
                   <User size={18} className="text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-blue-900 mb-1">{selectedVoice.name}</p>
+                  <p className="font-medium text-blue-900 mb-1">
+                    {selectedVoice.name.replace(/Microsoft\s+/gi, '').replace(/\s+Microsoft/gi, '').trim()}
+                  </p>
                   <div className="flex items-center gap-2 text-sm text-blue-700">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                       selectedVoice.gender === 'female' 
                         ? 'bg-pink-100 text-pink-700' 
                         : 'bg-blue-100 text-blue-700'
                     }`}>
-                      {selectedVoice.gender === 'male' ? 'Voz masculina' : 'Voz femenina'}
+                      {selectedVoice.gender === 'male' ? '♂ Voz masculina' : '♀ Voz femenina'}
                     </span>
                     <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
                       {selectedVoice.lang}
@@ -99,7 +159,7 @@ const VoiceSettings: React.FC<VoiceSettingsProps> = ({
             variant={showCatalog ? "default" : "outline"}
           >
             <List size={18} />
-            {showCatalog ? 'Ocultar Catálogo de Voces' : 'Explorar Catálogo de Voces'}
+            {showCatalog ? 'Ocultar Catálogo Completo' : 'Ver Catálogo Completo de Voces'}
           </Button>
         </div>
       </Card>
