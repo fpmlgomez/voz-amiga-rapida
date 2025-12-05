@@ -25,7 +25,7 @@ const AppHeader = () => {
       <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 via-purple-50 to-cyan-50 rounded-xl border border-blue-100 max-w-3xl mx-auto">
         <div className="flex items-center justify-center gap-6 flex-wrap">
           <a 
-            href="https://www.adapt-ia-vida.com" 
+            href="https://adapt-iavida.site/" 
             target="_blank" 
             rel="noopener noreferrer"
             className="hover:opacity-80 transition-opacity"
