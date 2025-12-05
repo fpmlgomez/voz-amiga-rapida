@@ -23,12 +23,19 @@ const AppHeader = () => {
       
       {/* Créditos de la innovación */}
       <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 via-purple-50 to-cyan-50 rounded-xl border border-blue-100 max-w-3xl mx-auto">
-        <div className="flex items-center justify-center gap-4 flex-wrap">
-          <img 
-            src={adaptIaVidaLogo} 
-            alt="Logo ADAPT-IA VIDA" 
-            className="w-16 h-16 object-contain rounded-full"
-          />
+        <div className="flex items-center justify-center gap-6 flex-wrap">
+          <a 
+            href="https://www.adapt-ia-vida.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:opacity-80 transition-opacity"
+          >
+            <img 
+              src={adaptIaVidaLogo} 
+              alt="Logo ADAPT-IA VIDA" 
+              className="w-24 h-24 object-contain rounded-full shadow-md"
+            />
+          </a>
           <p className="text-sm text-gray-700 leading-relaxed text-left flex-1 min-w-[280px]">
             <span className="font-semibold text-purple-700">Esta innovación ha sido realizada por la </span>
             <span className="font-bold text-blue-700">Dra. María Luisa Gómez Jiménez</span>
