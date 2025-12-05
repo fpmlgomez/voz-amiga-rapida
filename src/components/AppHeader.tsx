@@ -27,7 +27,7 @@ const AppHeader = () => {
           <span className="font-bold text-blue-700">Dra. María Luisa Gómez Jiménez</span>
           <span className="font-semibold text-purple-700">, CEO de </span>
           <span className="font-bold text-cyan-700">ADAPT-IA VIDA. UMA</span>
-          <span className="text-gray-600">, y se integra en el catálogo de innovaciones del ecosistema de innovación diseñado por la autora para mejorar la </span>
+          <span className="text-gray-600">, y se integra en el catálogo de soluciones del ecosistema de innovación diseñado por la autora para mejorar la </span>
           <span className="font-semibold text-blue-600">inclusión</span>
           <span className="text-gray-600"> y </span>
           <span className="font-semibold text-purple-600">accesibilidad social</span>
