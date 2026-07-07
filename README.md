@@ -1,4 +1,6 @@
-# Welcome to your Lovable project
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21236171.svg)](https://doi.org/10.5281/zenodo.21236171)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
 
 ## Project info
 
