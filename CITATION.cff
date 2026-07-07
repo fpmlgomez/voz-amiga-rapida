@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "Si utilizas este software, cítalo así:"
+title: "Voz Amiga Rápida"
+abstract: "Aplicación web de asistencia por voz para personas mayores, desarrollada en el marco de la investigación sobre envejecimiento activo, accesibilidad y derecho asistencial de la Dra. María Luisa Gómez Jiménez (Universidad de Málaga)."
+authors:
+  - family-names: "Gómez Jiménez"
+    given-names: "María Luisa"
+    orcid: "https://orcid.org/0000-0002-3358-786X"
+    affiliation: "Universidad de Málaga"
+version: 1.0.0
+date-released: 2026-07-07
+license: AGPL-3.0
+repository-code: "https://github.com/fpmlgomez/voz-amiga-rapida"
+keywords:
+  - "accesibilidad"
+  - "envejecimiento activo"
+  - "asistencia por voz"
+  - "personas mayores"
+  - "derecho asistencial"
+  - "innovación social"
+type: software
