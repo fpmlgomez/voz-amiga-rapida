@@ -71,3 +71,21 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Licencia y copyright
+
+Copyright © 2026 María Luisa Gómez Jiménez  
+Universidad de Málaga · ORCID: [0000-0002-3358-786X](https://orcid.org/0000-0002-3358-786X)
+
+Este software se distribuye bajo la licencia **GNU Affero General Public License v3.0 (AGPL-3.0)**.  
+Consulta el fichero [LICENSE](./LICENSE) para el texto completo.
+
+> Si utilizas este software en un servicio accesible por red, estás obligado 
+> a publicar tus modificaciones bajo la misma licencia AGPL-3.0.
+
+## Cómo citar
+
+Si utilizas este software en investigación, cítalo mediante el fichero 
+[`CITATION.cff`](./CITATION.cff) o con el DOI de Zenodo (disponible tras la primera release)
+
+
