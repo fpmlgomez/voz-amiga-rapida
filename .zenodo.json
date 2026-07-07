@@ -1,0 +1,26 @@
+{
+  "title": "Voz Amiga Rápida",
+  "description": "Aplicación web de asistencia por voz para personas mayores, desarrollada en el marco de la investigación sobre envejecimiento activo, accesibilidad y derecho asistencial de la Dra. María Luisa Gómez Jiménez (Universidad de Málaga).",
+  "creators": [
+    {
+      "name": "Gómez Jiménez, María Luisa",
+      "affiliation": "Universidad de Málaga",
+      "orcid": "0000-0002-3358-786X"
+    }
+  ],
+  "keywords": [
+    "accesibilidad",
+    "envejecimiento activo",
+    "asistencia por voz",
+    "personas mayores",
+    "derecho asistencial",
+    "innovación social"
+  ],
+  "license": "AGPL-3.0",
+  "upload_type": "software",
+  "access_right": "open",
+  "language": "spa",
+  "communities": [
+    { "identifier": "universidad-de-malaga" }
+  ]
+}
